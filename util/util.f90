@@ -133,7 +133,8 @@
       SUBROUTINE Integrator_Update_Options( option,            &
                                             Do_Update_RConst,  &
                                             Do_Update_Photo,   &
-                                            Do_Update_Sun     )
+                                            Do_Update_Sun,     &
+                                            Do_Update_LWC      )
 
       !~~~> Input variables
       INTEGER, INTENT(IN)  :: option
@@ -142,12 +143,14 @@
       LOGICAL, INTENT(OUT) :: Do_Update_RCONST
       LOGICAL, INTENT(OUT) :: Do_Update_PHOTO
       LOGICAL, INTENT(OUT) :: Do_Update_SUN
+      LOGICAL, INTENT(OUT) :: Do_Update_LWC
 
       ! Option -1: turn off all Update_* calls within the integrator
       IF ( option == -1 ) THEN
          Do_Update_RCONST = .FALSE.
          Do_Update_PHOTO  = .FALSE.
          Do_Update_SUN    = .FALSE.
+         Do_Update_LWC    = .FALSE.
          RETURN
       ENDIF
 
@@ -155,6 +158,7 @@
       Do_Update_RCONST = ( IAND( option, 1 ) > 0 )
       Do_Update_PHOTO  = ( IAND( option, 2 ) > 0 )
       Do_Update_SUN    = ( IAND( option, 4 ) > 0 )
+      Do_Update_LWC    = ( IAND( option, 4 ) > 0 )
 
       END SUBROUTINE Integrator_Update_Options
 

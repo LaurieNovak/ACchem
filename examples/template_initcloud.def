@@ -1,0 +1,27 @@
+#INITVALUES
+  CFACTOR = 2.55E+10;
+  ALL_SPEC = 0.;
+
+  HCOOHg    = {HCOOHg};
+  O1Dg      = {O1Dg};
+  O3g       = {O3g};
+  H2O2g     = {H2O2g};
+  NOg       = {NOg};
+  NO2g      = {NO2g};
+  NO3g      = {NO3g};
+  N2O5g     = {N2O5g};
+  HNO3g     = {HNO3g};
+  CH2Og     = {CH2Og};
+  COg       = {COg};
+  OHg       = {OHg};
+  HO2g      = {HO2g};
+  CH3OOHg   = {CH3OOHg};
+  CH3OOg    = {CH3OOg};
+  CH2Og     = {CH2Og};
+  CH4g      = {CH4g};
+  M        = 1.E9;
+  DUMMY    = 1.;
+  H2Og      = {H2Og};
+  H2g       = 550.; 
+  CO2g      = {CO2g};
+

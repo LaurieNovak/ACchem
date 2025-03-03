@@ -1,0 +1,38 @@
+#EQUATIONS { gas-phase chemistry from Barth et al. (2003) }
+
+//{G1}    O3 {+hv} = 		2 OH				: 2.7E-6 * SUN;
+{G1}    O3 {+hv} = 		O1D {+ O2}			: 4.0E-5 * SUN;
+{G2}    O1D {+M} = 		O3 {+M}				: ARR3(2.9E-11, -100, TEMP);
+{G3}    O1D {+ H2O} = 		2 OH				: ARR3(2.2E-10, 0., TEMP);
+{G4}	HO2 + O3 = 		OH {+ 2O2}			: ARR3(2.E-15, 500., TEMP);
+{G5}	OH + O3 = 		HO2 {+ O2}			: ARR3(6.8E-14, 940., TEMP);
+{G6}	HO2 + OH = 		H2O + O2			: ARR3(1.1E-10, -250., TEMP);
+{G7}	HO2 + HO2 = 		H2O2 {+ O2}			: EPR(1.7E-11, -600., 4.9E-32, -1000., 2.24E-18, -2200., C_M, C_H2O, TEMP);
+{G8}	H2O2 {+ hv} = 		2 OH				: 9.2E-6 * SUN;  //8.88E-6 * SUN;  	//  barth(9.2E-6)
+{G9}	H2O2 + OH = 		HO2 {+ H2O}			: ARR3(1.7E-12, 160., TEMP); // MCM (=1.7E-12 * zh2o2) (IFS has 1.8E-12 * zh2o2)
+
+{G10}	NO + O3 = 		NO2 {+ O2}			: ARR3(1.8E-14, 1400., TEMP);
+{G11}	HO2 + NO = 		OH + NO2			: ARR3(8.1E-12, -250., TEMP);
+{G12}	NO2 {+ hv} =		NO + O3				: 9.4E-3 * SUN;  //8.9E-3 * SUN;  	// barth(9.4E-3)
+{G13}	OH + NO2 {+ M} = 	HNO3 {+ M}			: TROE_no2oh(2.5E-30, -4.4, 1.6E-11, -1.7, 10., C_M, TEMP);
+{G14}	HNO3 {+ hv} = 		OH + NO2			: 6.5E-7 * SUN;
+{G15}	NO2 + O3 = 		NO3 {+ O2}			: ARR3(3.2E-17, 2500.,TEMP);
+{G16}	NO3 {+ hv} =		.92 NO2 + .08 NO + .92 O3	: 9.4E-1 * SUN;  //0.2337 * SUN;  	// barth(9.4E-1)
+{G17}	NO3 + NO = 		2 NO2				: ARR3(2.6E-11, -170.,TEMP);
+{G18}	NO3 + NO2 {+ M} = 	N2O5 {+ M}			: TROE_ifs(2.2E-30, -3.9, 1.5E-12, -0.7, 10., C_M, TEMP);
+{G19}	N2O5 {+ M} = 		NO3 + NO2 {+ M}			: 5.1E-5 * SUN + TROE_ifs(2.2E-30, -3.9, 1.5E-12, -0.7, 10., C_M, TEMP) / 2.9E-11;  // based on barth(2003) where k = kG18/K, where K = 2.9E-11
+
+{G21}	CH4 + OH {+ O2} = 	CH3OO {+ H2O}			: ARR3(6.3E-15, 1800., TEMP);
+{G22}	CH3OO + NO {+ O2} = 	CH2O + NO2 + HO2		: ARR3(7.7E-12, -280., TEMP);
+{G23}	CH3OO + HO2 = 		CH3OOH {+ O2}			: ARR3(5.6E-12, -800., TEMP);   //3.8E-13, 780., TEMP) * (1. - (1. / (1. + ARR3(498., -1160., TEMP))));
+{G24}	CH3OO + HO2 = 		CH2O + H2O {+ O2}		: ARR3(2.0E-12, 0., TEMP);   //3.8E-13, 780., TEMP) * (1. / (1. + ARR3(498., -1160., TEMP)));
+{G25}	CH3OO + CH3OO {+ O2} = 	2 CH2O + 2 HO2			: ARR3(4.7E-13, -190., TEMP);
+{G26}	CH3OOH {+ O2} = 	CH2O + OH + HO2			: 8.7E-6 * SUN;  //5.531E-06 * SUN; 	// barth(8.7E-6);
+{G27}	CH3OOH + OH = 		.7 CH3OO + .3 CH2O + .3 OH	: ARR3(7.4E-12, -200., TEMP);
+{G28}	CH2O {+ 2 O2} =		CO + 2 HO2			: 3.6E-5 * SUN;  //2.845E-05 * SUN;  	// barth(3.6E-5)
+{G29}	CH2O {+ hv} = 		CO + 2 H2			: 5.0E-5 * SUN;  // 3.734E-05 * SUN;  	// barth(5.0E-5)
+{G30}	CH2O + OH {+ O2} = 	CO + HO2 {+ H2O}		: ARR3(1.E-12, 0., TEMP);
+{G31}	CH2O + NO3 {+ O2} = 	CO + HNO3 + HO2			: ARR3(5.8E-16, 0., TEMP);
+{G32}	CO + OH {+ O2} = 	HO2 {+ CO2}			: ARR3(2.4E-13, 0., TEMP); //TROE_cooh(5.9E-33, 1.4, 1.1E-12, -1.3, 1.5E-13, -0.6, 2.1E9, -6.1, 0.6, C_M, TEMP);
+{G33}	HCOOH + OH {+ O2} = 	CO2 + HO2 {+ H2O}		: ARR3(4.3E-13, 0., TEMP);
+

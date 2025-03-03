@@ -1,0 +1,308 @@
+#include aqbarth.spc
+#include aqbarth.eqn
+
+#LOOKATALL
+#MONITOR Og;O1Dg;O3g;OHg;HO2g;H2O2g;NOg;NO2g;NO3g;N2O5g;HNO3g;HO2g;NO2g;COg;CH3OOg;CH2Og;CH3OOHg;HCOOHg;M;O2g;CH4g;DUMMY;H2Og;H2g;CO2g;
+
+#INITVALUES
+  CFACTOR = 1.;  //2.16E+10; // from ppb to molec/cm3
+  ALL_SPEC = 0.;
+{Variable species}
+ O3g       = 8.614E11;  //40.; 
+ H2O2g     = 2.1603E10;  //1.;
+ OHg       = 3.49961E6;  //0.162E-3;
+ HO2g      = 3.49961E8;  //16.2E-3;
+ CH3OOg    = 0.0;
+ CH3OOHg   = 4.331E9;  //0.2;
+ CH2Og     = 9.721E9;  // 0.45;
+ HCOOHg    = 0.0;
+ NOg       = 0.0; 
+ NO2g      = 2.916E9;  //0.135;
+ HNO3g     = 2.16025E9; //0.1;
+ N2O5g     = 0.0;
+ NO3g      = 0.0;
+ COg       = 1.944E12;  //90.;
+ //Clm       = 3545;
+{Fixed species}
+ CH4g     = 3.6724E13;  //1700.;
+ M        = 1.E9;
+ DUMMY    = 1.;
+ H2Og     = 3.44E17;  //1.E7;
+ H2g      = 1.188E13;  //550.;
+ CO2g     = 7.561E15;  //350.E3;
+ H2Oaq    = 3.44E17;  //3.74E3;
+ Hp	  = 0.00001;  //10.E7;
+ //OHm	  = 1.7E4;
+
+#INLINE C_GLOBAL
+extern double LWC;
+extern double cloud;
+#ENDINLINE
+
+#INLINE C_INIT
+   TSTART = 11.0*3600.0; //8.0*3600.0;
+   TEND = TSTART + 2.0*3600.0; //2.*24.0*3600.0;
+   DT = 60.0; //900.0;
+   TEMP = 285.0; //298.15;
+#ENDINLINE
+
+#INLINE C_RCONST
+double C_M = 2.55E+19;	   // 7.24291E+16*1E+5/TEMP
+double C_H2 =11.88E+12;    // 1.275E+13; 	// 500 ppb * 2.55E10
+double C_H2O = 4.E+17;  // 3.55E+17; 	//2.55E+17 (mhh);  	// 0.01*C_M
+double C_Hp = pow(10., -5.);  // * Na * Liq;  // molec/cm3
+#ENDINLINE
+
+#INLINE C_RATES
+const double PI = 3.14159265358979;  // Pi
+const double Na = 6.02214076E23;  // molecules/mol
+const double Navo = 6.022E20; // molec/mol L/cm3
+const double R = 0.082057366080960;  // L atm K-1 mol-1
+const double Rg = 8.31446261815324;  // J K-1 mol-1
+//const double C_Hp = pow(10., -5.);
+const double P = 850. * 0.000987;  //Pressure in atm
+const double rho_air = 1.04; //kg/m3
+const double rho_h2o = 997; //kg/m3
+const double water = 10.25; //g/kg
+const double Liq = ((water/rho_h2o) / (1./rho_air)) * 1.E-6;  //  L H2O / cm3 air
+//const double LWC = 0.3E-6;
+
+double ARRmhh(double A0, double B0, double TEMP)
+       {
+       return A0 * exp(B0 / TEMP);
+       }
+
+double ARR3(double A0, double B0, double TEMP)
+       {
+       return A0 * exp(B0 * ((1./298.) - (1./TEMP)));    	// rate  [molec/cm3/s]
+       }
+
+double ARRaq(double A0, double B0, double TEMP, double cloud)
+       {
+       double k;
+       k =  A0 * exp(B0 * ((1./TEMP) - (1./298.)));  		// rate in [L/mol/s]
+       return k * cloud; // / (Navo * LWC) ;  				// rate in cm3 / molec s-1
+       }
+
+double aciddis(double A0, double B0, double TEMP, double cloud)
+       {
+       double Ka;
+       Ka = A0 * exp(B0 * ((1./TEMP) - (1./298.)));  		// dissociation constant  [mol/L]
+       return Ka * cloud;  					// dissociation constant  [mol/L] if cloud=1
+       }
+
+double transint(double M, double alpha, double TEMP, double cloud)
+       {
+       double v, tdg, ti, kmt, Px;
+       v = 1.E2 * pow(((8. * Rg * TEMP) / (M * PI)), 0.5);  	// molecular speed  [cm/s]
+       tdg = pow(10.E-4, 2.) / (3.*0.1);  			// diffusion time  [s]
+       ti = (4.*10.E-4) / (3. * v * alpha);  			// trans-interface mass transfer  [s]	
+       kmt = pow((tdg + ti), -1.);				// rate of mass transfer  [s-1]
+       Px = P / 2.16025E19; 				// from [molec/cm3] to [ppb] to partial pressure [atm]
+       return (Px / (R * TEMP)) * kmt * cloud;			// calculate rate  [mol/L/s]
+       }
+
+double Heneq(double M, double alpha, double A0, double B0, double TEMP)
+       {
+       double v, tdg, ti, kmt, E, rate;
+       v = 1.E2 * pow(((8. * Rg * TEMP) / (M * PI)), 0.5);	// average molecular speed  [cm/s]	
+       tdg = pow(10.E-4, 2.) / (3.*0.1);			// diffusion time  [s]
+       ti = (4.*10.E-4) / (3. * v * alpha);			// trans-interface mass transfer  [s]
+       kmt = pow((tdg + ti), -1.);				// rate of mass transfer  [s-1]
+       E =  A0 * exp(B0 * ((1./TEMP) - (1./298.)));		// Henry's constant  [mol/L/atm]
+       rate = (kmt / E) * LWC;					// rate constant  [mol/L/atm/s]
+       return (rate / (P * 2.16025E19)) * cloud;  		// calculate rate  [molec/cm3/s] // (E * R * TEMP));
+       }
+
+double Heffeq(double M, double alpha, double A0, double B0, double TEMP,
+            double A1, double B1, double C_Hp)
+       {
+       double v, tdg, ti, kmt, E, Ka, Heff;
+       v = 1.E2 * pow((( 8. * Rg * TEMP) / (M * PI)), 0.5);
+       tdg = pow(10.E-4, 2.) / (3. * 0.1);
+       ti = (4.*10.E-4) / (3. * v *alpha);
+       kmt = pow((tdg + ti), -1.);
+       E = A0 * exp(B0 * ((1./TEMP) - (1./298.)));
+       Ka = A1 * exp(B1 * ((1./TEMP) - (1./298.)));
+       Heff = E * (1. + (Ka/C_Hp));
+       return kmt / (Heff * R * TEMP);
+       }
+
+double TROE_ifs(double kzero, double mzero, double kinf,
+            double minf, double fmulti, double MN2, double TEMP)
+       {
+       double k0T, kinfT, kappa, phi;
+       k0T  = (kzero * pow((TEMP/300.), mzero)) * MN2;
+       kinfT = kinf * pow((TEMP/300.), minf);
+       kappa = k0T / kinfT;   //znn_b = 0.75 - (1.27 * log10(0.35));
+       phi = pow(pow((1. + log10(kappa)), 2.), -1.);
+       return (k0T / (1. + kappa)) * pow(0.6, phi);   //* kinfT) / (k0T + kinfT) * pow(fmulti, log10(0.35) / (1. + pow(log10(k0T/kinfT)/znn_b, 2)));
+       }
+
+double TROE_ifsmhh(double kzero, double mzero, double kinf,
+            double minf, double fmulti, double MN2, double TEMP)
+       {
+       double k0T, kinfT, znn_b;
+       k0T = (kzero * pow((TEMP/300.), mzero)) * MN2;
+       kinfT = kinf * pow((TEMP/300.), minf);
+       znn_b = 0.75 - (1.27 * log10(0.35));
+       return (k0T * kinfT) / (k0T + kinfT) * pow(fmulti,
+              log10(0.35)/(1. + pow(log10(k0T/kinfT)/znn_b, 2)));
+       }
+
+double TROE_ifs2(double kzero, double mzero, double kinf,
+            double minf, double fmulti, double MN2, double Kg19, 
+            double c1, double TEMP)
+       {
+       double k0T, kinfT, kappa, phi, kg19;
+       k0T  = (kzero * pow((TEMP/300.), mzero)) * MN2;
+       kinfT = kinf * pow((TEMP/300.), minf);
+       kappa = k0T / kinfT;
+       phi = pow(pow((1. + log10(kappa)), 2.), -1.);
+       kg19 = ((k0T / (1. + kappa)) * pow(0.6, phi)) / Kg19;
+       return kg19 * exp(c1 * ((1./298.) - (1./TEMP)));
+       }
+
+double TROE_ifs2mhh(double kzero, double mzero, double kinf, 
+       	    double minf, double fmulti, double MN2, double c1, 
+	    double c2, double TEMP)
+       {
+       double k0T, kinfT, znn_b;
+       k0T  = (kzero * pow((TEMP/300.), mzero)) * MN2 * exp(c1 / TEMP);
+       kinfT = kinf * pow((TEMP/300.), minf) * exp(c2 / TEMP);
+       znn_b = 0.75 - (1.27 * log10(0.35));
+       return (k0T * kinfT) / (k0T + kinfT) * pow(fmulti, 
+       	      log10(0.35) / (1. + pow(log10(k0T/kinfT)/znn_b, 2)));
+       }
+
+double TROE_no2ohmhh(double kzero, double mzero, double kinf,
+            double fmulti, double MN2, double TEMP)
+       {
+       double k0T, kinfT, znn;
+       k0T = (kzero * pow((300./TEMP), mzero)) * MN2;
+       kinfT = kinf;
+       znn = 0.75 - (1.27 * log10(0.41));
+       return (k0T * kinfT) / (k0T + kinfT) * pow(fmulti, 
+              (log10(0.41) / (1. + pow((log10(k0T/kinfT))/znn, 2))));
+       }
+     
+double TROE_no2oh(double kzero, double mzero, double kinf, double minf, 
+       	    double fmulti, double MN2, double TEMP)
+       {
+       double k0T, kinfT, kappa, phi;
+       k0T  = (kzero * pow((TEMP/300.), mzero)) * MN2;
+       kinfT = kinf * pow((TEMP/300.), minf);
+       kappa = k0T / kinfT;  //znn = 0.75 - (1.27 * log10(0.41));
+       phi = pow(pow((1. + log10(kappa)), 2.), -1.);
+       return ((k0T / (1. + kappa)) * pow(0.6, phi));   // * kinfT) / (k0T + kinfT) * pow(fmulti, (log10(0.41) / (1. + pow((log10(k0T/kinfT))/znn, 2))));
+       }
+
+double TROE_cooh(double kzero, double mzero, double kinf, 
+       	    double minf, double k3, double c3, double k4, 
+	    double c4, double fmulti, double MN2, double TEMP)
+       {
+       double k0T, kinfT, kval3, kval4, kcooh;
+       k0T  = (kzero * pow((300./TEMP), mzero)) * MN2;
+       kinfT = kinf * pow((300./TEMP), minf);
+       kval3 = k3 * pow((300./TEMP), c3);
+       kval4 = (k4 * pow((300./TEMP), c4)) / MN2;
+       kcooh = k0T / (1. + k0T / kinfT) * pow(fmulti, 
+       	     1. / (1. + pow(log10(k0T/kinfT), 2)));
+       return kcooh + (kval3 / (1. + kval3 / kval4) * pow(fmulti, 
+              1. / (1. + pow(log10(kval3/kval4), 2))));
+       }
+
+double EPRmhh(double A1, double C1, double A2, double C2,
+           double A3, double C3, double mmult, double ch2o,
+           double TEMP)
+      {
+      double K1, K2, K3, EPR_p;
+      
+      K1 = (double)A1 * exp(C1/TEMP);
+      K2 = (double)A2 * exp(C2/TEMP) * mmult;
+      K3 = (double)A3 * exp(C3/TEMP) * ch2o;
+      EPR_p = (K1 + K2) * (1. + K3);
+
+      return (double)EPR_p;
+      }
+
+double EPR(double A1, double C1, double A2, double C2, 
+           double A3, double C3, double mmult, double ch2o,
+	   double TEMP) 
+      {               
+      double K1, K2, K3, EPR_p;
+      
+      K1 = (double)A1 * exp(C1 * ((1./298.) - (1./TEMP)));
+      K2 = (double)A2 * exp(C2 * ((1./298.) - (1./TEMP))) * mmult;
+      K3 = (double)A3 * exp(C3 * ((1./298.) - (1./TEMP))) * ch2o;
+      EPR_p = (K1 + K2) * (1.0 + K3);
+      
+      return (double)EPR_p;
+      }
+
+double k3rd_iupac(double kzero, double mzero, double kinf, 
+       	    double minf, double fmulti, double MN2, double NM, double TEMP)
+       {
+       double k0T;
+       double kinfT;
+       k0T  = (kzero * pow((TEMP/300.), mzero)) * MN2;
+       kinfT = kinf * pow((TEMP/300.), minf);
+       return (k0T / (1. + (k0T/kinfT))) * 
+       	       pow( fmulti, 1./ (1. + pow((log10(k0T/kinfT)/NM), 2) ) );
+       }
+
+double usr_O3_hv_H2Omhh(double TEMP, double Mv, double ch2o, double J_O1D)
+       {
+       double KH2O, KN2, KO2;
+       KH2O = 1.63E-10 *ch2o * exp(60.0/TEMP);
+       KN2  = 2.15E-11 * exp(110.0/TEMP) *0.79*Mv;
+       KO2  = 3.30E-11 * exp(55.0 /TEMP) *0.21*Mv;
+       return ((KH2O *J_O1D) / (KH2O + KN2 + KO2));
+       }
+
+double usr_O3_hv_H2O(double TEMP, double kh2o, double B0h2o, double ch2o,
+            double kmv, double B0mv, double Mv, double J_O1D)
+       {
+       double KH2O, KMv; //KN2, KO2; 
+       KH2O = kh2o * ch2o * exp(B0h2o * ((1./298.) - (1./TEMP)));  //1.63E-10 *ch2o * exp(60.0/TEMP);
+       KMv = kmv * Mv * exp(B0mv * ((1./298.) - (1./TEMP)));
+       //KN2  = 2.9E-11 * exp(-100.0/TEMP) *0.79*Mv; //2.15E-11 * exp(110.0/TEMP) * 0.79 * Mv;
+       //KO2  = 3.30E-11 * exp(55.0 /TEMP) *0.21*Mv;
+       return ((KH2O *J_O1D) / (KH2O + KMv));  //KN2 + KO2));
+       }
+
+double RK28(double k0a, double k0ea, double k2a,
+            double k2ea, double k3a, double k3ea,
+            double MN2, double TEMP)
+       {
+       double k0, k2, k3;
+       k0 = k0a * exp(k0ea/TEMP);
+       k2 = (k2a * exp(k2ea/TEMP)) * MN2;
+       k3 = k3a * exp(k3ea/TEMP);
+
+       return k0 + k3 * k2 / (k3 + k2);
+       }
+
+
+void Update_LWC()
+{
+double Cloudstart, Cloudend;
+double Thour, Tlocal, Ttmp;
+
+  Cloudstart = 11.5;
+  Cloudend = 13.5;
+  Thour = TIME / 3600.0;
+  Tlocal = Thour - (((int)Thour/24)*24);
+
+  if ( (Tlocal >= Cloudstart) && (Tlocal <= Cloudend) ) {
+    Ttmp = (2.0*Tlocal-Cloudstart-Cloudend)/(Cloudend-Cloudstart);
+    if (Ttmp > 0) Ttmp = Ttmp*Ttmp;
+             else Ttmp = -Ttmp*Ttmp;
+    cloud = 1.;
+  } else {
+    cloud = 0.0;
+  }
+}
+
+#ENDINLINE
+

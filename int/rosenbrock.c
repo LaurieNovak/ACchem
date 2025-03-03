@@ -84,6 +84,7 @@
  int  KppDecomp( KPP_REAL A[] );
  void KppSolve ( KPP_REAL A[], KPP_REAL b[] );
  void Update_SUN();
+ void Update_LWC();
  void Update_RCONST();
  
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
@@ -1183,6 +1184,7 @@ void FunTemplate( KPP_REAL T, KPP_REAL Y[], KPP_REAL Ydot[] )
    Told = TIME;
    TIME = T;
    Update_SUN();
+   Update_LWC();
    Update_RCONST();
    Fun( Y, FIX, RCONST, Ydot );
    TIME = Told;
@@ -1205,6 +1207,7 @@ void JacTemplate( KPP_REAL T, KPP_REAL Y[], KPP_REAL Jcb[] )
    Told = TIME;
    TIME = T ; 
    Update_SUN();
+   Update_LWC();
    Update_RCONST();
    Jac_SP( Y, FIX, RCONST, Jcb );
    TIME = Told;

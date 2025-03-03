@@ -1,0 +1,44 @@
+#EQUATIONS { chemistry from Barth et al. (2003) }
+
+{E1f}   O3g =                           O3aq                            : transint(48.E-3, 5.3E-4, TEMP, LWC);
+{E1b}   O3aq =                          O3g                             : Heneq(48.E-3, 5.3E-4, 1.1E-2, 2300., TEMP);
+{E2f}   H2O2g =                         H2O2aq                          : transint(34.E-3, 0.02, TEMP, LWC);
+{E2b}   H2O2aq =                        H2O2g                           : Heneq(34.E-3, 0.02, 8.3E4, 7400., TEMP);
+//{E3f}   OHg =                           OHaq                            : transint(17.E-3, 0.05, TEMP, LWC);
+//{E3b}   OHaq =                          OHg                             : Heneq(17.E-3, 0.05, 30., 4500., TEMP);
+{E4f}   HO2g =                          HO2aq                           : transint(33.E-3, 0.20, TEMP, LWC);
+{E4b}   HO2aq =                         HO2g                            : Heffeq(33.E-3, 0.20, 4.E3, 5900., TEMP, 3.5E-5, 0., C_Hp);
+//{E5f}   CH3OOg =                        CH3OOaq                         : transint(47.E-3, 0.05, TEMP, LWC);
+//{E5b}   CH3OOaq =                       CH3OOg                          : Heneq(47.E-3, 0.05, 15., 5600., TEMP);
+//{E6f}   CH3OOHg =                       CH3OOHaq                        : transint(48.E-3, 0.05, TEMP, LWC);
+//{E6b}   CH3OOHaq =                      CH3OOHg                         : Heneq(48.E-3, 0.05, 3.1E2, 5200., TEMP);
+//{E7f}   CH2Og =                         CHOHOHaq                        : transint(47.E-3, 0.05, TEMP, LWC);
+//{E7b}   CHOHOHaq =                      CHOHOHaq                        : Heneq(47.E-3, 0.05, 3.2E3, 6800., TEMP);
+//{E8f}   HCOOHg =                        HCOOHaq                         : transint(46.E-3, 0.05, TEMP, LWC);
+//{E8b}   HCOOHaq =                       HCOOHg                          : Heneq(46.E-3, 0.05, 5.4E3, 5700., TEMP);
+//{E9f}   NOg =                           NOaq                            : transint(30.E-3, 0.005, TEMP, LWC);
+//{E9b}   NOaq =                          NOg                             : Heneq(30.E-3, 0.005, 1.9E-3, 1500., TEMP);
+//{E10f}  NO2g =                          NO2aq                           : transint(46.E-3, 0.00063, TEMP, LWC);
+//{E10b}  NO2aq =                         NO2g                            : Heneq(46.E-3, 0.00063, 6.4E-3, 2500., TEMP);
+//{E11f}  HNO3g =                         HNO3aq                          : transint(63.E-3, 0.05, TEMP, LWC);
+//{E11b}  HNO3aq =                        HNO3g                           : Heneq(63.E-3, 0.05, 2.4E6, 8700., TEMP);
+//{E12f}  N2O5g =                         2 HNO3aq                        : (1.E12*LWC);
+//{E13f}  NO3g =                          NO3aq                           : transint(62.E-3, 0.001, TEMP, LWC);
+//{E13b}  NO3aq =                         NO3g                            : Heneq(62.E-3, 0.001, 1.8, 2000., TEMP);
+//{E14f}  CO2g =                          CO2aq                           : transint(44.E-3, 0.05, TEMP, LWC);
+//{E14b}  CO2aq =                         CO2g                            : Heneq(44.E-3, 0.05, 3.6E-2, 2200., TEMP);
+
+{Acid Dissociation Equilibria}
+//{E15f}  H2O2aq =                        HO2m + Hp                       : ARRaq(5.E10, -1500., TEMP) * aciddis(2.2E-12, -3700., TEMP);
+//{E15b}  HO2m + Hp =                     H2O2aq                          : ARRaq(5.E10, -1500., TEMP);  // same as A10!!
+{E16f}  HO2aq =                         O2m + Hp                        : (100.);
+{E16b}  O2m + Hp =                      HO2aq                           : 100. / ARRaq(3.5E-5, 0., TEMP);
+//{E17f}  HCOOHaq =                       HCOOm + Hp                      : (100.E-1);
+//{E17b}  HCOOm + Hp =                    HCOOHaq                         : 100.E-1 / ARRaq(1.8E-4, -1500., TEMP);
+//{E18f}  HNO3aq =                        NO3m + Hp                       : (100.E-1);
+//{E18b}  NO3m + Hp =                     HNO3aq                          : 100.E-1 / ARRaq(15., 0., TEMP);
+//{E19f}  CO2aq =                         HCO3m + Hp                      : (100.E-1);
+//{E19b}  HCO3m + Hp =                    CO2aq                           : 100.E-1 / ARRaq(4.5E-7, -1000., TEMP);
+//{E20f}  Cl2m =                          Clm + Claq                      : (100.E-1);
+//{E20b}  Clm + Claq =                    Cl2aq                           : 100.E-1 / ARRaq(5.3E-6, 0., TEMP);
+ 

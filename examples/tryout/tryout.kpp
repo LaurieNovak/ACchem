@@ -1,0 +1,5 @@
+
+#MODEL      tryout 
+#INTEGRATOR rosenbrock
+#LANGUAGE   c
+#DRIVER     general

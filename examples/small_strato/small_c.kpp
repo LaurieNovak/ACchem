@@ -1,0 +1,4 @@
+#MODEL      small_strato
+#INTEGRATOR rosenbrock
+#LANGUAGE   c
+#DRIVER     general

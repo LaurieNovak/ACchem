@@ -35,6 +35,10 @@ C ****************************************************************
      *              (C(LOOKAT(i))/CFACTOR, i=1,NLOOKAT)
 999   FORMAT(E24.16,100(1X,E24.16))
 
+      WRITE(10,999) (TIME-TSTART)/3600.D0,
+     *              (R(NREACT(i)), i=1,NREACT)
+999   FORMAT(E24.16.100(1X,E24.16))   
+
       RETURN
       END
 

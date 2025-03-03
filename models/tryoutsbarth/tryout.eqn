@@ -1,0 +1,111 @@
+#EQUATIONS { chemistry from Barth et al. (2003) }
+
+{Gas-phase}
+//{G1}    O3g {+ hv} = 			2 OHg				: (2.7E-6);  // usr_O3_hv_H2O(TEMP, 2.2E-10, 0., C_H2O, 2.9E-11, -100.,  C_M, 4.0E-5);
+//{G1}    O3g {+ hv} =                    O1Dg {+ O2g}                    : (4.E-5);
+//{G2}    O1Dg {+ M} =                    O3g { + M}                      : ARR3(2.9E-11, -100., TEMP) * C_M;
+//{G3}    O1Dg {+ H2Og} =                 2 OHg                           : ARR3(2.2E-10, 0., TEMP) * C_H2O;
+//{G4}    HO2g + O3g =                    OHg {+ 2 O2g}                   : ARR3(2.E-15, 500., TEMP);     //(1.E-14, -490., TEMP);
+//{G5}    OHg + O3g =                     HO2g {+ O2g}                    : ARR3(6.8E-14, 940., TEMP);    //(1.7E-12, -940., TEMP);
+//{G6}    HO2g + OHg =                    H2Og {+ O2g}                    : ARR3(1.1E-10, -250., TEMP) ;  //(4.8E-11, 250., TEMP);
+//{G7}    HO2g + HO2g =                   H2O2g {+ O2g}                   : EPRmhh(3.E-13, 460., 2.1E-33, 920., 1.4E-21, 2200., C_M, C_H2O, TEMP);
+//{G8}    H2O2g {+ hv} =                  2 OHg                           : (9.2E-6);                     //(8.88E-6);
+//{G9}    H2O2g + OHg =                   HO2g {+ H2Og}                   : ARR3(1.7E-12, 160., TEMP);    //2.9E-12, -160., TEMP); // MCM (=1.7E-12 * zh2o2) (IFS has 1.8E-12 * zh2o2)
+
+//{G10}   NOg + O3g =                     NO2g {+ O2g}                    : ARR3(1.8E-14, 1400., TEMP);   //ARRmhh(3.E-12, -1500., TEMP);
+//{G11}   HO2g + NOg =                    OHg + NO2g                      : ARR3(8.1E-12, -250., TEMP);   //mhh(3.3E-12, 270., TEMP);
+//{G12}   NO2g {+ hv} =                   NOg + O3g                       : (9.4E-3);                     //(8.9E-3);
+{G13}   OHg + NO2g {+ M} =              HNO3g {+ M}                     : TROE_no2oh(2.5E-30, -4.4, 1.6E-11, -1.7, 10., C_M, TEMP);
+{G14}   HNO3g {+ hv} =                  OHg + NO2g                      : (6.5E-7);
+//{G15}   NO2g + O3g =                    NO3g {+ O2g}                    : ARR3(3.2E-17, 2500., TEMP);   //1.4E-13, -2470., TEMP);
+//{G16}   NO3g {+ hv} =                   .92 NO2g + .08 NOg + .92 O3g    : (0.2337);                     //(9.4E-1);
+//{G17}   NO3g + NOg =                    2 NO2g                          : ARR3(2.6E-11, -170., TEMP);   //mhh(1.8E-11, 110.,TEMP);
+//{G18}   NO3g + NO2g {+ M} =             N2O5g {+ M}                     : TROE_ifsmhh(3.6E-30, 4.1, 1.9E-12, -0.2, 10., C_M, TEMP);
+//{G19}   N2O5g {+ M} =                   NO3g + NO2g {+ M}               : 5.1E-5 + TROE_ifs2mhh(1.3E-3, -3.5, 9.7E14, 0.1, 10., C_M, -11000., -11080., TEMP);  // based on barth(2003) where k = kG18/K, where K = 2.9E-11
+
+//{G21}   CH4g + OHg {+ O2g} =            CH3OOg {+ H2Og}                 : ARR3(6.3E-15, 1800., TEMP);
+//{G22}   CH3OOg + NOg {+ O2g} =          CH2Og + NO2g + HO2g             : ARR3(7.7E-12, -280., TEMP);   //mhh(2.8E-12, 300., TEMP);
+//{G23}   CH3OOg + HO2g =                 CH3OOHg {+ O2g}                 : ARR3(5.6E-12, -800., TEMP);   //mhh(3.8E-13, 780., TEMP) * (1. - (1. / (1. + ARR3(498., -1160., TEMP))));
+//{G24}   CH3OOg + HO2g =                 CH2Og + H2Og {+ O2g}            : ARR3(2.E-12, 0., TEMP);       //mhh(3.8E-13, 780., TEMP) * (1. / (1. + ARR3(498., -1160., TEMP)));
+//{G25}   CH3OOg + CH3OOg {+ O2g} =       2 CH2Og + 2 HO2g                : ARR3(4.7E-13, -190., TEMP);   //mhh(9.5E-14, 390., TEMP);
+//{G26}   CH3OOHg {+ O2g + hv} =          CH2Og + OHg + HO2g              : (8.6E-6);                     //(5.531E-06);
+//{G27}   CH3OOHg + OHg =                 .7 CH3OOg + .3 CH2Og + .3 OHg   : ARR3(7.4E-12, -200., TEMP);   //mhh(3.8E-12, 200., TEMP);
+//{G28}   CH2Og {+ hv + 2 O2g} =          COg + 2 HO2g                    : (3.6E-5);                     //(2.845E-05);
+//{G29}   CH2Og {+ hv} =                  COg {+ 2 H2g}                   : (5.E-5);                      //(3.734E-05);
+//{G30}   CH2Og + OHg {+ O2g} =           COg + HO2g {+ H2Og}             : ARR3(1.E-11, 0., TEMP);       //mhh(5.5E-12, 125., TEMP);
+//{G31}   CH2Og + NO3g {+ O2g} =          COg + HNO3g + HO2g              : ARR3(5.8E-16, 0., TEMP);
+//{G32}   COg + OHg {+ O2g} =             HO2g + CO2g                     : ARR3(2.4E-13, 0., TEMP);      //TROE_cooh(5.9E-33, 1.4, 1.1E-12, -1.3, 1.5E-13, -0.6, 2.1E9, -6.1, 0.6, C_M, TEMP);
+//{G33}   HCOOHg + OHg {+ O2g} =          CO2g + HO2g {+ H2Og}            : ARR3(4.3E-13, 0., TEMP);
+
+
+{Equilibrium}
+//{E1f}   O3g =                           O3aq                            : transint(47.997E-3, 5.3E-4, TEMP, LWC);
+//{E1b}   O3aq =                          O3g                             : Heneq(47.997E-3, 5.3E-4, 1.1E-2, 2300., TEMP);
+//{E2f}   H2O2g =                         H2O2aq                          : transint(34.014E-3, 0.02, TEMP, LWC);
+//{E2b}   H2O2aq =                        H2O2g                           : Heffeq(34.014E-3, 0.02, 8.3E4, 7400., TEMP, 2.2E-12, -3700., C_Hp);
+//{E3f}   OHg =                           OHaq                            : transint(17.008E-3, 0.05, TEMP, LWC);
+//{E3b}   OHaq =                          OHg                             : Heneq(17.008E-3, 0.05, 30., 4500., TEMP);
+//{E4f}   HO2g =                          HO2aq                           : transint(33.007E-3, 0.20, TEMP, LWC);
+//{E4b}   HO2aq =                         HO2g                            : Heffeq(33.007E-3, 0.20, 4.E3, 5900., TEMP, 3.5E-5, 0., C_Hp);
+//{E5f}   CH3OOg =                        CH3OOaq                         : transint(47.033E-3, 0.05, TEMP, LWC);
+//{E5b}   CH3OOaq =                       CH3OOg                          : Heneq(47.033E-3, 0.05, 15., 5600., TEMP);
+//{E6f}   CH3OOHg =                       CH3OOHaq                        : transint(48.041E-3, 0.05, TEMP, LWC);
+//{E6b}   CH3OOHaq =                      CH3OOHg                         : Heneq(48.041E-3, 0.05, 3.1E2, 5200., TEMP);
+//{E7f}   CH2Og =                         CHOHOHaq                        : transint(47.033E-3, 0.05, TEMP, LWC);
+//{E7b}   CHOHOHaq =                      CH2Og	                        : Heneq(47.033E-3, 0.05, 3.2E3, 6800., TEMP);
+//{E8f}   HCOOHg =                        HCOOHaq                         : transint(46.025E-3, 0.05, TEMP, LWC);
+//{E8b}   HCOOHaq =                       HCOOHg                          : Heffeq(46.025E-3, 0.05, 5.4E3, 5700., TEMP, 1.8E-4, -1500., C_Hp);
+{E9f}   NOg =                           NOaq                            : transint(30.006E-3, 0.005, TEMP, LWC);
+//{E9b}   NOaq =                          NOg                             : Heneq(30.006E-3, 0.005, 1.9E-3, 1500., TEMP);
+{E10f}  NO2g =                          NO2aq                           : transint(46.006E-3, 0.00063, TEMP, LWC);
+//{E10b}  NO2aq =                         NO2g                            : Heneq(46.006E-3, 0.00063, 6.4E-3, 2500., TEMP);
+{E11f}  HNO3g =                         HNO3aq                          : transint(63.013E-3, 0.05, TEMP, LWC);
+{E11b}  HNO3aq =                        HNO3g                           : Heffeq(63.013E-3, 0.05, 2.4E6, 8700., TEMP, 15., 0., C_Hp);
+{E12f}  N2O5g =                         2 HNO3aq                        : (1.E12*LWC);
+//{E13f}  NO3g =                          NO3aq                           : transint(62.005E-3, 0.001, TEMP, LWC);
+//{E13b}  NO3aq =                         NO3g                            : Heneq(62.005E-3, 0.001, 1.8, 2000., TEMP);
+//{E14f}  CO2g =                          CO2aq                           : transint(44.01E-3, 0.05, TEMP, LWC);
+//{E14b}  CO2aq =                         CO2g                            : Heffeq(44.01E-3, 0.05, 3.6E-2, 2200., TEMP, 4.5E-7, -1000., C_Hp);
+
+
+{Acid Dissociation Equilibria}
+//{E15f}  H2O2aq = 			HO2m + Hp			: ARRaq(5.E10, -1500., TEMP) * ARRaq(2.2E-12, -3700., TEMP);
+//{E15b}  HO2m + Hp = 			H2O2aq				: ARRaq(5.E10, -1500., TEMP);  // same as A10!!
+//{E16f}  HO2aq = 			O2m + Hp			: (1000.E-1);
+//{E16b}  O2m + Hp = 			HO2aq				: 1000.E-1 / ARRaq(3.5E-5, 0., TEMP);
+//{E17f}  HCOOHaq = 			HCOOm + Hp			: (1000.E-1);
+//{E17b}  HCOOm + Hp = 			HCOOHaq				: 1000.E-1 / ARRaq(1.8E-4, -1500., TEMP);
+{E18f}  HNO3aq = 			NO3m + Hp			: (1000.E-1);
+{E18b}  NO3m + Hp = 			HNO3aq				: 1000.E-1 / ARRaq(15., 0., TEMP);
+//{E19f}  CO2aq = 			HCO3m + Hp			: (1000.E-1);
+//{E19b}  HCO3m + Hp = 			CO2aq				: 1000.E-1 / ARRaq(4.5E-7, -1000., TEMP);
+//{E20f}  Cl2m = 				Clm + Claq			: (1000.E-1);
+//{E20b}  Clm + Claq = 			Cl2aq				: 1000.E-1 / ARRaq(5.3E-6, 0., TEMP);
+
+{Aqueous Phase Chemistry}
+//{A1}	O3aq {+ hv} + H2Oaq =		H2O2aq + O2aq			: (6.0E-5);
+//{A2} 	H2O2aq {+ hv} = 		2 OHaq				: (1.4E-5);
+//{A3}	CH2OHOHaq + OHaq + O2aq = 	HCOOHaq + HO2aq + H2Oaq		: ARRaq(2.E9, -1500., TEMP); 
+//{A4} 	HCOOHaq + OHaq + O2aq = 	CO2aq + HO2aq + H2Oaq		: ARRaq(1.6E8, -1500., TEMP);
+//{A5} 	HCOOm + OHaq + O2aq = 		CO2aq + HO2aq + OHm		: ARRaq(2.5E9, -1500., TEMP);
+//{A6}	CH3OOaq + O2m + H2Oaq = 		CH3OOHaq + OHm + O2aq		: ARRaq(5.E7, -1600., TEMP);
+//{A7} 	CH3OOHaq + OHaq = 		CH3OOaq + H2Oaq			: ARRaq(2.7E7, -1700., TEMP);
+//{A8}	CH3OOHaq + OHaq = 		CH2OHOHaq + OHaq		: ARRaq(1.9E7, -1900., TEMP);
+//{A9}	HO2aq + O2m = 			HO2m + O2aq			: ARRaq(1.E8, -1500., TEMP);
+//{A10}	HO2m + Hp = 			H2O2aq				: ARRaq(5.E10, -1500., TEMP);
+//{A11}	OHaq + OHaq = 			H2O2aq				: ARRaq(5.2E9, -1500., TEMP);
+//{A12}	O3aq + O2m + H2Oaq = 		OHaq + 2 O2aq + OHm		: ARRaq(1.5E9, -1500., TEMP);
+//{A13}	O3aq + OHaq = 			HO2aq + O2aq + OHm		: ARRaq(3.E9, -1500., TEMP);
+//{A14}	H2O2aq + OHaq = 		HO2aq + H2Oaq			: ARRaq(2.7E7, -1700., TEMP);
+//{A15}	OHaq + O2m = 			OHm + O2aq			: ARRaq(1.E10, -1500., TEMP);
+//{A16}	HCO3m + OHaq = 			CO3m + H2Oaq			: ARRaq(1.E7, -1500., TEMP);
+//{A17}	HCO3m + HO2aq = 		CO3m + HO2m			: ARRaq(1.5E6, -1500., TEMP);
+//{A18}	CO3m + H2O2aq = 		HCO3m + HO2aq			: ARRaq(8.E5, -2800., TEMP);
+//{A19}	CO3m + O2m = 			HCO3m + O2aq + OHm		: ARRaq(4.E8, -1500., TEMP);
+//{A20}	HO2aq + Cl2m = 			2 Clm + O2aq + Hp		: ARRaq(4.5E9, -1500., TEMP);
+//{A21}	O2m + Cl2m = 			2 Clm + O2aq			: ARRaq(1.E9, -1500., TEMP);
+//{A22}	H2O2aq + Cl2m = 		2 Clm + HO2aq + Hp		: ARRaq(1.4E5, -3400., TEMP);
+//{A23}	H2O2aq + Claq = 		Clm + HO2aq + Hp		: ARRaq(4.5E7, 0., TEMP);
+//{A24}	NO3aq + Clm = 			NO3m + Claq			: ARRaq(1.E8, -1500., TEMP);
+//{A25}	NO3aq + O2m = 			NO3m + O2aq			: ARRaq(1.E9, -1500., TEMP);
+ 

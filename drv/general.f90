@@ -48,6 +48,7 @@ kron: DO WHILE (T < TEND)
 !~~~> Update sunlight intensity and reaction rates
 !~~~> before calling the integrator.
         CALL Update_SUN()
+        CALL Update_LWC()
         CALL Update_RCONST()
 
 !~~~> Call the integrator

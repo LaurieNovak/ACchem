@@ -10,7 +10,8 @@ int  CloseSaveData();
 int  GenerateMatlab( char * prefix );
 void GetMass( double CL[], double Mass[] );
 void INTEGRATE( double TIN, double TOUT );
-
+double LWC;
+double cloud;
 int main()
 {
   KPP_REAL dval[NSPEC];

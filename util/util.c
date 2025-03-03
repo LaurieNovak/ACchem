@@ -22,17 +22,37 @@ int InitSaveData()
     printf("\n Can't create file : KPP_ROOT.dat");
     exit(1);
   }
+  
+  // Write header for the file
+//  fprintf(fpDat, "Time (h) ");
+//  for (int i = 0; i < NLOOKAT; i++) {
+//    fprintf(fpDat, "C[%d] ", LOOKAT[i]);
+//  }
+//  for (int j = 0; j < NREACT; j++) {
+//    fprintf(fpDat, "RCONST[%d] ", j);
+//  }
+//  fprintf(fpDat, "\n");
+  
   return 0;
 }
 
 int SaveData()
 {
 int i;
+//int j;
 
-  fprintf( fpDat, "%6.1f ", TIME/3600.0 );
-  for( i = 0; i < NLOOKAT; i++ )
-    fprintf( fpDat, "%24.16e ", C[ LOOKAT[i] ]/CFACTOR );
-  fprintf( fpDat, "\n");
+  // Write time and concentrations
+  fprintf(fpDat, "%6.5f ", TIME / 3600.0);
+  for (i = 0; i < NLOOKAT; i++) {
+    fprintf(fpDat, "%24.16e ", C[LOOKAT[i]] / CFACTOR);
+  }
+// Write reaction rate constants
+//  for (j = 0; j < NREACT; j++) {
+//    fprintf(fpDat, "%24.16e ", RCONST[j]);
+//  }
+
+  fprintf(fpDat, "\n");
+ 
   return 0;
 }
 

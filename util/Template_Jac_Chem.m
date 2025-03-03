@@ -14,6 +14,7 @@ function J =  KPP_ROOT_Jac_Chem(T, Y)
   Told = TIME;
   TIME = T;
   KPP_ROOT_Update_SUN;
+  KPP_ROOT_Update_LWC;
   KPP_ROOT_Update_RCONST;
   
 %  This line calls the Matlab ODE Jacobian routine  

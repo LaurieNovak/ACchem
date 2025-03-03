@@ -1,0 +1,192 @@
+#include gasbarth2.spc
+#include gasbarth2.eqn
+
+#LOOKATALL
+#MONITOR Og;O1Dg;O3g;OHg;HO2g;H2O2g;NOg;NO2g;NO3g;N2O5g;HNO3g;HONOg;HO2g;NO2g;COg;CH3OOg;CH2Og;CH3OOHg;HCOOHg;M;O2g;CH4g;DUMMY;H2Og;H2g;CO2g;
+
+#INITVALUES
+  CFACTOR = 2.55E+10;
+
+#include initgas.def
+
+#INLINE C_INIT
+   TSTART = 12.5*3600.0; //8.0*3600.0;
+   TEND = TSTART + 0.5*3600.0; //2.*24.0*3600.0;
+   DT = 60.0; //900.0;
+   TEMP = 285.0; //298.15;
+#ENDINLINE
+
+#INLINE C_RCONST
+double C_M = 2.55E+19;		//7.24291E+16*1E+5/TEMP
+double C_H2 = 1.275E+13; 	// 500 ppb * 2.55E10
+double C_H2O = 5.344E+17; 	//2.55E+17;  	// 0.01*C_M
+#ENDINLINE
+
+#INLINE C_RATES
+
+double ARRmhh(double A0, double B0, double TEMP)
+       {
+       return A0 * exp(B0 / TEMP);
+       }
+
+double ARR3(double A0, double B0, double TEMP)
+       {
+       return A0 * exp(B0 * ((1./298.) - (1./TEMP)));
+       }
+
+double TROE_ifs(double kzero, double mzero, double kinf, 
+       	    double minf, double fmulti, double MN2, double TEMP)
+       {
+       double k0T, kinfT, kappa, phi;
+       k0T  = (kzero * pow((TEMP/300.), mzero)) * MN2;
+       kinfT = kinf * pow((TEMP/300.), minf);
+       kappa = k0T / kinfT;   //znn_b = 0.75 - (1.27 * log10(0.35));
+       phi = pow(pow((1. + log10(kappa)), 2.), -1.);
+       return (k0T / (1. + kappa)) * pow(0.6, phi);   //* kinfT) / (k0T + kinfT) * pow(fmulti, log10(0.35) / (1. + pow(log10(k0T/kinfT)/znn_b, 2)));
+       }
+
+double TROE_ifsmhh(double kzero, double mzero, double kinf,
+            double minf, double fmulti, double MN2, double TEMP)
+       {
+       double k0T, kinfT, znn_b;
+       k0T = (kzero * pow((TEMP/300.), mzero)) * MN2;
+       kinfT = kinf * pow((TEMP/300.), minf);
+       znn_b = 0.75 - (1.27 * log10(0.35));
+       return (k0T * kinfT) / (k0T + kinfT) * pow(fmulti,
+              log10(0.35)/(1. + pow(log10(k0T/kinfT)/znn_b, 2)));
+       }
+
+double TROE_ifs2(double kzero, double mzero, double kinf,
+            double minf, double fmulti, double MN2, double Kg19, 
+            double c1, double TEMP)
+       {
+       double k0T, kinfT, kappa, phi, kg19;
+       k0T  = (kzero * pow((TEMP/300.), mzero)) * MN2;
+       kinfT = kinf * pow((TEMP/300.), minf);
+       kappa = k0T / kinfT;
+       phi = pow(pow((1. + log10(kappa)), 2.), -1.);
+       kg19 = ((k0T / (1. + kappa)) * pow(0.6, phi)) / Kg19;
+       return kg19 * exp(c1 * ((1./298.) - (1./TEMP)));
+       }
+
+
+double TROE_ifs2mhh(double kzero, double mzero, double kinf, 
+       	    double minf, double fmulti, double MN2, double c1, 
+	    double c2, double TEMP)
+       {
+       double k0T, kinfT, znn_b;
+       k0T  = (kzero * pow((TEMP/300.), mzero)) * MN2 * exp(c1 / TEMP);
+       kinfT = kinf * pow((TEMP/300.), minf) * exp(c2 / TEMP);
+       znn_b = 0.75 - (1.27 * log10(0.35));
+       return (k0T * kinfT) / (k0T + kinfT) * pow(fmulti, 
+       	      log10(0.35) / (1. + pow(log10(k0T/kinfT)/znn_b, 2)));
+       }
+double TROE_no2ohmhh(double kzero, double mzero, double kinf,
+            double fmulti, double MN2, double TEMP)
+       {
+       double k0T, kinfT, znn;
+       k0T = (kzero * pow((300./TEMP), mzero)) * MN2;
+       kinfT = kinf;
+       znn = 0.75 - (1.27 * log10(0.41));
+       return (k0T * kinfT) / (k0T + kinfT) * pow(fmulti, 
+              (log10(0.41) / (1. + pow((log10(k0T/kinfT))/znn, 2))));
+       }
+     
+double TROE_no2oh(double kzero, double mzero, double kinf, double minf, 
+       	    double fmulti, double MN2, double TEMP)
+       {
+       double k0T, kinfT, kappa, phi;
+       k0T  = (kzero * pow((TEMP/300.), mzero)) * MN2;
+       kinfT = kinf * pow((TEMP/300.), minf);
+       kappa = k0T / kinfT;  //znn = 0.75 - (1.27 * log10(0.41));
+       phi = pow(pow((1. + log10(kappa)), 2.), -1.);
+       return ((k0T / (1. + kappa)) * pow(0.6, phi));   // * kinfT) / (k0T + kinfT) * pow(fmulti, (log10(0.41) / (1. + pow((log10(k0T/kinfT))/znn, 2))));
+       }
+
+double TROE_cooh(double kzero, double mzero, double kinf, 
+       	    double minf, double k3, double c3, double k4, 
+	    double c4, double fmulti, double MN2, double TEMP)
+       {
+       double k0T, kinfT, kval3, kval4, kcooh;
+       k0T  = (kzero * pow((300./TEMP), mzero)) * MN2;
+       kinfT = kinf * pow((300./TEMP), minf);
+       kval3 = k3 * pow((300./TEMP), c3);
+       kval4 = (k4 * pow((300./TEMP), c4)) / MN2;
+       kcooh = k0T / (1. + k0T / kinfT) * pow(fmulti, 
+       	     1. / (1. + pow(log10(k0T/kinfT), 2)));
+       return kcooh + (kval3 / (1. + kval3 / kval4) * pow(fmulti, 
+              1. / (1. + pow(log10(kval3/kval4), 2))));
+       }
+
+double EPRmhh(double A1, double C1, double A2, double C2,
+           double A3, double C3, double mmult, double ch2o,
+           double TEMP)
+      {
+      double K1, K2, K3, EPR_p;
+      
+      K1 = (double)A1 * exp(C1/TEMP);
+      K2 = (double)A2 * exp(C2/TEMP) * mmult;
+      K3 = (double)A3 * exp(C3/TEMP) * ch2o;
+      EPR_p = (K1 + K2) * (1. + K3);
+
+      return (double)EPR_p;
+      }
+
+double EPR(double A1, double C1, double A2, double C2, 
+           double A3, double C3, double mmult, double ch2o,
+	   double TEMP) 
+      {               
+      double K1, K2, K3, EPR_p;
+      
+      K1 = (double)A1 * exp(C1 * ((1./298.) - (1./TEMP)));
+      K2 = (double)A2 * exp(C2 * ((1./298.) - (1./TEMP))) * mmult;
+      K3 = (double)A3 * exp(C3 * ((1./298.) - (1./TEMP))) * ch2o;
+      EPR_p = (K1 + K2) * (1.0 + K3);
+      
+      return (double)EPR_p;
+      }
+
+double k3rd_iupac(double kzero, double mzero, double kinf, 
+       	    double minf, double fmulti, double MN2, double NM, double TEMP)
+       {
+       double k0T;
+       double kinfT;
+       k0T  = (kzero * pow((TEMP/300.), mzero)) * MN2;
+       kinfT = kinf * pow((TEMP/300.), minf);
+       return (k0T / (1. + (k0T/kinfT))) * 
+       	       pow( fmulti, 1./ (1. + pow((log10(k0T/kinfT)/NM), 2) ) );
+       }
+
+double usr_O3_hv_H2Omhh(double TEMP, double Mv, double ch2o, double J_O1D)
+       {
+       double KH2O, KN2, KO2;
+       KH2O = 1.63E-10 *ch2o * exp(60.0/TEMP);
+       KN2  = 2.15E-11 * exp(110.0/TEMP) *0.79*Mv;
+       KO2  = 3.30E-11 * exp(55.0 /TEMP) *0.21*Mv;
+       return ((KH2O *J_O1D) / (KH2O + KN2 + KO2));
+       }
+
+double usr_O3_hv_H2O(double TEMP, double kh2o, double B0h2o, double ch2o,
+            double kmv, double B0mv, double Mv, double J_O1D)
+       {
+       double KH2O, KMv; //KN2, KO2; 
+       KH2O = kh2o * ch2o * exp(B0h2o * ((1./298.) - (1./TEMP)));  //1.63E-10 *ch2o * exp(60.0/TEMP);
+       KMv = kmv * Mv * exp(B0mv * ((1./298.) - (1./TEMP)));
+       //KN2  = 2.9E-11 * exp(-100.0/TEMP) *0.79*Mv; //2.15E-11 * exp(110.0/TEMP) * 0.79 * Mv;
+       //KO2  = 3.30E-11 * exp(55.0 /TEMP) *0.21*Mv;
+       return ((KH2O *J_O1D) / (KH2O + KMv));  //KN2 + KO2));
+       }
+
+double RK28(double k0a, double k0ea, double k2a, 
+            double k2ea, double k3a, double k3ea, 
+	    double MN2, double TEMP)
+       {
+       double k0, k2, k3;
+       k0 = k0a * exp(k0ea/TEMP);
+       k2 = (k2a * exp(k2ea/TEMP)) * MN2;
+       k3 = k3a * exp(k3ea/TEMP);
+
+       return k0 + k3 * k2 / (k3 + k2);
+       }  
+
+#ENDINLINE
