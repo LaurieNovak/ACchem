@@ -6,6 +6,7 @@ import pandas as pd
 import re
 
 # Function to read the last line of the .dat file
+# Function to read the last line of the .dat file
 def read_last_line(file_name):
     with open(file_name, 'rb') as f:
         f.seek(-2, 2)
